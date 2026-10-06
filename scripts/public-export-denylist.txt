@@ -1,0 +1,29 @@
+# Paths EXCLUDED from the public fresh-history snapshot built by
+# scripts/export-public-snapshot.sh. One pattern per line; `#` starts a comment.
+#   - a pattern without `/` matches a basename anywhere (like .gitignore)
+#   - `**` matches across directories, `*` within one path segment
+# Gitignored files are never tracked and therefore never exported anyway.
+#
+# Owner-internal long-form documents (the public record is CHANGELOG.md,
+# docs/ARCHITECTURE.md and docs/ENGINEERING_LOG.md).
+marshal.build — Functional Specification Document.md
+marshal.build — Build Log.md
+marshal.build — Marketing & FSD Corrections.md
+intdoc.md
+# Owner-internal operations and gate documents.
+docs/operations-owner.md
+docs/private-beta-runbook.md
+docs/innovation-sandbox-setup.md
+docs/alpha4-readiness-review.md
+docs/admin-guide.md
+# Maintainer tooling, specs and workflow artifacts.
+.kiro/**
+.agents/**
+.worktrees/**
+.vscode/**
+.DS_Store
+# The maintainers' marketing site content. infra/lib/marketing-stack.ts stays
+# in the snapshot because infra/bin/marshal.ts imports it; the stack is only
+# instantiated when MARKETING_CERT_ARN is set and then expects a
+# marketing/site/ directory supplied by the operator.
+marketing/**

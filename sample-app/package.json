@@ -1,0 +1,21 @@
+{
+  "name": "marshal-sample-app",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "synth": "cdk synth MarshalSampleApp --quiet && node -e \"const t=require('./cdk.out/MarshalSampleApp.template.json'); require('fs').writeFileSync('template.json', JSON.stringify(t, null, 2)); console.log('template.json OK:', Object.keys(t.Resources).length, 'resources')\"",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "aws-cdk": "^2.1100.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.220.0",
+    "constructs": "^10.3.0"
+  }
+}

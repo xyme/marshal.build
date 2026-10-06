@@ -1,0 +1,68 @@
+name: Bug report
+description: Something in marshal behaves incorrectly
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. For security issues do **not** file an issue; e-mail security@marshal.build (see SECURITY.md).
+        Before pasting logs, remove AWS account ids, Cognito pool/client ids, hostnames, e-mail addresses and anything else that identifies your installation.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Git commit or tag (shown beside the build stamp in the admin footer / profile page).
+      placeholder: "v0.1.0 or 12-char commit sha"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Chat / spec generation
+        - Spec editor / import / export
+        - Code generation (build tab)
+        - Deployment / Enclave
+        - Governance (risk, review, policies)
+        - Admin console
+        - Authentication / MFA
+        - Infra / deploy scripts
+        - Frontend (other)
+        - Backend API (other)
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Sign in as a power user
+        2. Open ...
+        3. Click ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs or error text
+      description: Backend log lines, browser console output, or the error shown in the UI. Redact identifiers first.
+      render: text
+  - type: dropdown
+    id: install
+    attributes:
+      label: Installation type
+      options:
+        - Self-hosted, SANDBOX_PROVIDER=direct
+        - Self-hosted, SANDBOX_PROVIDER=isb
+        - Local development (docker compose + uvicorn + next dev)
+        - Other / not sure

@@ -1,0 +1,87 @@
+name: CI
+
+# All jobs run with zero AWS access and no repository secrets so they pass on
+# public forks: the frontend builds with placeholder env, the backend suite is
+# SQLite-backed (tests/conftest.py), and `cdk synth` is account-agnostic.
+# secret-scan uses only the auto-provided GITHUB_TOKEN.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so gitleaks scans every commit in the range
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # GITLEAKS_LICENSE is only required for GitHub *organization* repos;
+          # add it as a repository secret if this repo moves under an org.
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build
+        env:
+          # Build-time placeholders; runtime values come from the real env
+          AUTH_SECRET: ci-placeholder
+          AUTH_COGNITO_ID: ci
+          AUTH_COGNITO_SECRET: ci
+          AUTH_COGNITO_ISSUER: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_ci
+          BACKEND_URL: http://localhost:8000
+
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-groups
+      - run: uv run ruff check .
+      - run: uv run pytest -q
+
+  infra:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [infra, sample-app]
+    defaults:
+      run:
+        working-directory: ${{ matrix.package }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.package }}/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npx cdk synth --quiet
+      - name: Verify committed sample template is current
+        if: matrix.package == 'sample-app'
+        run: |
+          npm run synth
+          git diff --exit-code template.json || {
+            echo "::error::sample-app/template.json is stale — run 'npm run synth' and commit"; exit 1; }

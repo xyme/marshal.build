@@ -1,0 +1,22 @@
+# Optional local Postgres for developers with Docker.
+# (The default dev setup uses the RDS dev instance provisioned by infra/MarshalDataStack;
+#  point backend/.env DATABASE_URL here instead if you prefer local.)
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: marshal
+      POSTGRES_PASSWORD: marshal
+      POSTGRES_DB: marshal
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marshal"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:

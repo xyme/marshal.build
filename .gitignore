@@ -1,0 +1,52 @@
+# deps
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# builds
+.next/
+out/
+dist/
+cdk.out/
+*.tsbuildinfo
+.turbo/
+
+# env & secrets — never commit
+.env
+.env.*
+!.env.example
+*.pem
+.auth-secret
+infra/cdk-outputs.json
+
+# tooling
+.DS_Store
+coverage/
+htmlcov/
+.mypy_cache/
+uv.lock.bak
+# local agent/MCP settings and workflow artifacts — never commit
+.kiro/settings/mcp.json
+.agents/
+# sibling git worktrees for parallel runs (registered in .git/worktrees)
+.worktrees/
+
+# local scratch
+tmp/
+.cdk.staging/
+infra/cdk-outputs-new.json
+.origin-verify
+
+# owner-private material — legal package drafts, roster, acceptance evidence.
+# Final approved versions live in owner-controlled storage, never in Git.
+private/
+# Installation overlay (owner pins — B22 P0 portability, FSD 13.5T)
+scripts/deploy-env.local.sh
+# Export identifier gate — local literal list (installation identifiers)
+scripts/export-gate.local.txt
+
+# Microsoft Office lock files (open PowerPoint/Word/Excel documents)
+~$*

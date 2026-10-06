@@ -1,0 +1,67 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: #020617; /* slate-950 */
+  color: #f1f5f9;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* driver.js tour popover theming */
+.marshal-tour.driver-popover {
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid #334155;
+  border-radius: 12px;
+}
+.marshal-tour .driver-popover-title {
+  color: #f1f5f9;
+}
+.marshal-tour .driver-popover-description {
+  color: #94a3b8;
+}
+/* S15-06: indigo-500 behind white text is ~3.4:1; indigo-600 clears AA. */
+.marshal-tour .driver-popover-navigation-btns button {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  text-shadow: none;
+  padding: 4px 12px;
+}
+.marshal-tour .driver-popover-navigation-btns button:hover {
+  background: #6366f1;
+}
+/* S15-06: #64748b on the popover background was ~3.4:1 — below WCAG AA. */
+.marshal-tour .driver-popover-progress-text {
+  color: #94a3b8;
+}
+.marshal-tour .driver-popover-arrow-side-bottom {
+  border-bottom-color: #0f172a;
+}
+.marshal-tour .driver-popover-arrow-side-top {
+  border-top-color: #0f172a;
+}
+.marshal-tour .driver-popover-arrow-side-left {
+  border-left-color: #0f172a;
+}
+.marshal-tour .driver-popover-arrow-side-right {
+  border-right-color: #0f172a;
+}
+
+/* Keyboard focus visibility (alpha-polish R2.5) */
+:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+}

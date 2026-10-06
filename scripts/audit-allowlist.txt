@@ -1,0 +1,55 @@
+# S14-03 supply-chain audit allowlist.
+#
+# One advisory ID per line with WHY it is accepted and what should re-open it.
+# Everything here was triaged on 29 Jul 2026 against actual exposure in this
+# application — not suppressed for convenience. With these accepted, the gate
+# runs in STRICT mode (AUDIT_STRICT=1), so any NEW high/critical finding fails
+# the build.
+
+# --- postcss (high) — build-time only -----------------------------------------
+# Next.js's CSS pipeline dependency. Every advisory here requires processing
+# attacker-controlled CSS or source maps. We compile only our own Tailwind/CSS
+# at image-build time; no CSS is processed at runtime and none comes from users.
+# RE-OPEN WHEN: we process any CSS we did not author, or Next ships a non-major
+# release resolving postcss > 8.5.22 (npm's only offered fix today is Next 16,
+# a MAJOR upgrade — tracked as its own piece of work, not a deploy-time change).
+GHSA-qx2v-qp2m-jg93   # postcss XSS via unescaped </style> in stringify output
+GHSA-6g55-p6wh-862q   # postcss arbitrary file read via sourceMappingURL
+GHSA-r28c-9q8g-f849   # postcss path traversal in source-map auto-loading
+# Added 4 Aug 2026 (blocked the rebrand image build — the gate working as
+# designed). Moderate severity, and by its own title the incomplete fix of
+# GHSA-6g55-p6wh-862q above: same attacker-controlled-sourceMappingURL class,
+# same zero exposure here (build-time only, our own CSS, `from` set by Next's
+# own pipeline). Vulnerable range moved to <=8.5.22; we resolve 8.4.31 pinned
+# by next@15.5.21.
+GHSA-fxqj-rqcc-2cmp   # postcss incomplete fix of GHSA-6g55-p6wh-862q
+
+# --- sharp (high) — removed from the serving path ------------------------------
+# Inherited libvips CVEs. sharp is Next's optional image-optimization dep. The
+# only next/image usages are a single static logo we ship ourselves, so S14-03
+# set images.unoptimized = true: the runtime never invokes sharp. It remains in
+# the dependency tree (hence the finding) but not on any request path.
+# RE-OPEN WHEN: we introduce runtime image optimization or user-supplied images.
+GHSA-f88m-g3jw-g9cj   # sharp <0.35.0 inherited libvips CVEs
+# Added 15 Sep 2026 (blocked the S14-02 MFA-fix deploy — gate working as
+# designed). Same class and same triage as the libvips entry above: inherited
+# codec CVEs (libheif) in sharp, which S14-03 removed from the serving path
+# (images.unoptimized = true; the one next/image usage is our own static
+# logo). npm's only full fix is sharp 0.35 via a Next major. Zero runtime
+# exposure here.
+# RE-OPEN WHEN: runtime image optimization returns, user-supplied images
+# appear, or Next ships a non-major release resolving sharp >= 0.35.0.
+GHSA-rgj7-g3m4-5g8c   # sharp inherited libheif CVEs (GHSA-g89c-p67h-r497 et al.)
+
+# --- dompurify (moderate) — vulnerable copy is not the sanitizing path ---------
+# Two copies resolve: mermaid -> dompurify 3.4.12 (PATCHED, above the <=3.4.11
+# range) and monaco-editor -> dompurify 3.4.8 (vulnerable, pinned by monaco).
+# The security-critical path is mermaid: it sanitizes AI-generated diagram
+# source before the one dangerouslySetInnerHTML in the app (MermaidBlock, with
+# mermaid securityLevel "strict") — and that path is already patched. Monaco is
+# used read-only to display markdown/code text, not to sanitize untrusted HTML.
+# RE-OPEN WHEN: monaco-editor ships with dompurify >= 3.4.12, or if any code
+# starts rendering untrusted HTML through monaco.
+GHSA-c2j3-45gr-mqc4   # dompurify CUSTOM_ELEMENT_HANDLING hook bypass
+GHSA-cmwh-pvxp-8882   # dompurify ALLOWED_ATTR pollution via setConfig()
+GHSA-vxr8-fq34-vvx9   # dompurify Trusted Types policy survives clearConfig()

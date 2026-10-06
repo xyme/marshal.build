@@ -1,0 +1,75 @@
+name: Installation problem
+description: scripts/deploy-cloud.sh or local development did not get you to a working installation
+title: "[install]: "
+labels: ["installation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read the "Deploying your own installation" section of the README first — most first-run failures (Bedrock model access, missing named AWS profile, paused deployment admissions, supply-chain gate) are described there.
+        **Redact** account ids, Cognito pool/client ids, CloudFront hostnames, bucket names and e-mail addresses from everything you paste.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Git commit or tag you deployed.
+    validations:
+      required: true
+  - type: input
+    id: region
+    attributes:
+      label: AWS region
+      description: marshal currently supports us-east-1 only; tell us if you tried another region.
+      placeholder: us-east-1
+    validations:
+      required: true
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Install tier
+      options:
+        - "Evaluate — SANDBOX_PROVIDER=direct (default)"
+        - "Operate — SANDBOX_PROVIDER=isb (AWS Innovation Sandbox)"
+        - "Local development only"
+    validations:
+      required: true
+  - type: dropdown
+    id: step
+    attributes:
+      label: Which deploy step failed?
+      description: The step banner printed by scripts/deploy-cloud.sh.
+      options:
+        - "Preflight live deploy context"
+        - "1/7 Deploy foundation stacks (network, auth, data, build)"
+        - "2/7 Write frontend auth secret bundle"
+        - "3/7 Build container images in CodeBuild"
+        - "4/7 Deploy app stack (ECS + ALB + CloudFront)"
+        - "5/7 Register callback URLs on the Cognito client"
+        - "6/7 Force rebuilt images onto ECS and wait for stability"
+        - "7/7 Basic deployment smoke"
+        - "The deploy finished but the app does not work (sign-in, chat, build, deploy)"
+        - "Local development (docker compose / alembic / uvicorn / next dev)"
+    validations:
+      required: true
+  - type: textarea
+    id: toolchain
+    attributes:
+      label: Toolchain versions
+      description: Output of `aws --version`, `node --version`, `python3 --version`, `uv --version`, `npx cdk --version`.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: overlay
+    attributes:
+      label: Overlay variables set
+      description: Names only (never values) of the variables you set in scripts/deploy-env.local.sh.
+      placeholder: "AWS_PROFILE, MARSHAL_AWS_ACCOUNT_ID, OPS_ALERT_EMAIL, SANDBOX_PROVIDER"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs
+      description: The failing step's output; for CodeBuild failures, the relevant part of the build log (the deploy script prints the deep link).
+      render: text
+    validations:
+      required: true

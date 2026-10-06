@@ -1,0 +1,34 @@
+**/node_modules
+**/.next
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+.git
+cdk.out
+**/cdk.out
+# ROOT-ANCHORED on purpose. Bare `docs` / `*.md` also matched NESTED paths,
+# which silently deleted the in-app documentation feature from the image:
+# `frontend/src/app/(app)/docs/` (the route) and `frontend/src/content/docs/*.md`
+# (its content) never reached the Docker context, so Next just built 21 routes
+# instead of 22 — no error, because lib/docs.ts is imported only by that route.
+# Found live: /docs returned 404 in production while passing locally (S16 deploy).
+/docs
+/.kiro
+/*.md
+!sample-app/template.json
+.env
+**/.env
+**/.env.*
+.auth-secret
+# Local-only material. No Dockerfile COPYs any of it; this keeps it out of the
+# docker build context (local builds and CodeBuild). The CodeBuild SOURCE zip is
+# a separate CDK S3 asset whose exclude list lives in infra/lib/build-stack.ts —
+# keep the two lists in step.
+.origin-verify
+/private
+/.agents
+/.worktrees
+/scripts/*.local.sh
+/scripts/*.local.txt
+/scripts/*.bak

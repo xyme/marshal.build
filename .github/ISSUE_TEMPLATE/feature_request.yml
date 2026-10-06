@@ -1,0 +1,44 @@
+name: Feature request
+description: Propose a capability or a change in behavior
+title: "[feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check [ROADMAP.md](../blob/main/ROADMAP.md) first; if the idea is already listed, comment on the matching issue instead.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that marshal makes hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What would you like marshal to do? Where in the product (chat, spec editor, build, deploy, governance, admin)?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Workarounds you tried, or other ways the problem could be solved.
+  - type: dropdown
+    id: governance
+    attributes:
+      label: Does this touch governance?
+      description: Risk scoring, review workflow, deployment policies, audit, cost caps, or anything that gates a deploy.
+      options:
+        - "No"
+        - "Yes — explain in the proposal how the gate behavior changes"
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to implement this (see CONTRIBUTING.md; a signed CLA is required).

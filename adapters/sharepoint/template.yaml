@@ -1,0 +1,81 @@
+# marshal SharePoint MCP adapter — recommended beta-drill hosting
+# (sharepoint-connector design §4): one Lambda container behind a function
+# URL in the control-plane account. Deployed independently of the platform
+# release path:
+#
+#   1. Create the config secret (one JSON object, values never in CFN):
+#      aws secretsmanager create-secret --name marshal/adapters/sharepoint \
+#        --secret-string '{"tenant_id":"…","client_id":"…","client_secret":"…",
+#                          "allowed_sites":"contoso.sharepoint.com:/sites/x",
+#                          "api_key":"<generate a long random value>"}'
+#   2. Build + push the image (see README), then:
+#      aws cloudformation deploy --template-file template.yaml \
+#        --stack-name marshal-sharepoint-adapter \
+#        --capabilities CAPABILITY_IAM \
+#        --parameter-overrides ImageUri=<account>.dkr.ecr.<region>.amazonaws.com/marshal/sharepoint-adapter:latest
+#
+# The function URL has NO AWS auth on purpose: the adapter enforces its own
+# static key on every request (the SAME value marshal's connector registry
+# custodies), and the MCP surface is read-only with per-site allowlisting.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: marshal SharePoint MCP adapter (Lambda container + function URL)
+
+Parameters:
+  ImageUri:
+    Type: String
+    Description: ECR image URI for the adapter container
+  SecretName:
+    Type: String
+    Default: marshal/adapters/sharepoint
+    Description: Secrets Manager name holding the adapter configuration
+
+Resources:
+  AdapterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  AdapterFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: marshal-sharepoint-adapter
+      PackageType: Image
+      Code: { ImageUri: !Ref ImageUri }
+      Role: !GetAtt AdapterRole.Arn
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          # Resolved at DEPLOY time from Secrets Manager — values live in
+          # the secret, never in this template or the console.
+          SP_TENANT_ID: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:tenant_id}}"
+          SP_CLIENT_ID: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:client_id}}"
+          SP_CLIENT_SECRET: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:client_secret}}"
+          SP_ALLOWED_SITES: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:allowed_sites}}"
+          SP_API_KEY: !Sub "{{resolve:secretsmanager:${SecretName}:SecretString:api_key}}"
+
+  AdapterUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !Ref AdapterFunction
+      AuthType: NONE
+
+  AdapterUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AdapterFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+Outputs:
+  AdapterEndpoint:
+    Description: Register this URL as the mcp_server connector base_url
+    Value: !GetAtt AdapterUrl.FunctionUrl
