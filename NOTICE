@@ -1,0 +1,36 @@
+marshal.build — Copyright 2026 marshal.build — Licensed under the Apache License, Version 2.0
+
+This product includes software developed by third parties. The notices below
+cover the components whose licenses ask for attribution or whose terms differ
+from Apache-2.0. Full license texts ship with each package inside the
+installed dependency trees (backend/.venv, frontend/node_modules, infra/node_modules)
+and in the SBOM produced on every image build (scripts/supply-chain-audit.sh).
+
+Backend (Python)
+- certifi — Mozilla Public License 2.0. Redistributed as an unmodified CA
+  certificate bundle; the MPL applies to that file only.
+- boto3 / botocore / s3transfer — Apache License 2.0 (Amazon.com, Inc.).
+
+Frontend (JavaScript)
+- Next.js, React, react-dom — MIT License (Vercel, Inc.; Meta Platforms, Inc.).
+- dompurify — dual-licensed (MPL-2.0 OR Apache-2.0); used under the
+  Apache License 2.0.
+- @img/sharp-libvips-darwin-arm64 (prebuilt libvips for sharp) — LGPL-3.0-or-later.
+  Dynamically linked, dependency-tree only; image optimization is disabled
+  (images.unoptimized), so it is not on the serving path.
+- caniuse-lite — browser-support data licensed CC-BY-4.0 (Alexis Deveria).
+- khroma — MIT License per the license file bundled with the package
+  (no license field in its package manifest).
+- axe-core — Mozilla Public License 2.0. Development and accessibility
+  drills only; not shipped in the runtime image.
+- lightningcss — Mozilla Public License 2.0. Build-time CSS tooling only;
+  not shipped in the runtime image.
+
+Infrastructure and runner (TypeScript / Python)
+- AWS Cloud Development Kit (aws-cdk-lib, aws-cdk, constructs) — Apache
+  License 2.0 (Amazon.com, Inc.).
+- TypeScript — Apache License 2.0 (Microsoft Corporation).
+
+All other dependencies are distributed under MIT, ISC, BSD or other
+permissive licenses compatible with Apache-2.0 redistribution. Re-run the
+license inventory before each release.

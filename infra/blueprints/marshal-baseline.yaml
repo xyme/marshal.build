@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  marshal sandbox baseline blueprint (FSD 4.5.5F, Sprint-1 minimal cut).
+  Deployed by Innovation Sandbox as a blueprint StackSet instance into each
+  leased account. Provides the cross-account deployment role marshal's
+  control plane assumes to run CloudFormation deployments, plus the app log
+  group. (VPC/KMS baseline lands with the S2 hardening pass.)
+
+Parameters:
+  # B22 P0: no default — every installation supplies its own control-plane
+  # account (StackSet updates pass UsePreviousValue=true).
+  ControlPlaneAccountId:
+    Type: String
+    AllowedPattern: "^[0-9]{12}$"
+    Description: AWS account id of the marshal control plane (hub) account.
+
+Resources:
+  DeploymentRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AIFactoryDeploymentRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${ControlPlaneAccountId}:root"
+            Action: sts:AssumeRole
+      Description: Assumed by the marshal control plane to deploy app stacks into this sandbox account.
+      MaxSessionDuration: 3600
+      Policies:
+        - PolicyName: MarshalDeploymentScope
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: CloudFormationAndAppServices
+                Effect: Allow
+                Action:
+                  - cloudformation:*
+                  - lambda:*
+                  - apigateway:*
+                  - logs:*
+                  - s3:*
+                  - dynamodb:*
+                  - events:*
+                  - sqs:*
+                  - sns:*
+                  - states:*
+                Resource: "*"
+              - Sid: IamForAppRoles
+                Effect: Allow
+                Action:
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:GetRole
+                  - iam:PassRole
+                  - iam:TagRole
+                  - iam:UntagRole
+                  - iam:PutRolePolicy
+                  - iam:DeleteRolePolicy
+                  - iam:GetRolePolicy
+                  - iam:AttachRolePolicy
+                  - iam:DetachRolePolicy
+                  - iam:ListRolePolicies
+                  - iam:ListAttachedRolePolicies
+                Resource: "*"
+              # C1 connector-lite (COPY custody, product decision 7 Sep 2026):
+              # the deployer provisions per-deployment connector copies at
+              # marshal/agent-connectors/<slug> and deletes them at teardown.
+              # Scoped to that prefix ONLY — the ISB deployment role gains no
+              # reach into any other secret. StackSet rollout of this revision
+              # to the pool accounts is an ACTIVATION prerequisite for the
+              # connectors_enabled flag (runbook).
+              - Sid: AgentConnectorCopies
+                Effect: Allow
+                Action:
+                  - secretsmanager:CreateSecret
+                  - secretsmanager:PutSecretValue
+                  - secretsmanager:DeleteSecret
+                  - secretsmanager:DescribeSecret
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:marshal/agent-connectors/*"
+                  # Composable agents R2.2: dependency edges ride the same
+                  # copy custody (one StackSet rollout covers both prefixes)
+                  - !Sub "arn:${AWS::Partition}:secretsmanager:*:${AWS::AccountId}:secret:marshal/agent-dependencies/*"
+      Tags:
+        - Key: marshal-ai:managed
+          Value: "true"
+        - Key: marshal-ai:role
+          Value: deployment
+
+  AppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /marshal-ai/app
+      RetentionInDays: 30
+
+Outputs:
+  DeploymentRoleArn:
+    Value: !GetAtt DeploymentRole.Arn

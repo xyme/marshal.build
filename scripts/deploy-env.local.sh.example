@@ -1,0 +1,91 @@
+# Installation overlay for marshal deploys — EXAMPLE.
+#
+#   cp scripts/deploy-env.local.sh.example scripts/deploy-env.local.sh
+#   $EDITOR scripts/deploy-env.local.sh
+#
+# scripts/deploy-env.sh sources scripts/deploy-env.local.sh (gitignored) before
+# deriving anything, so every value you set here wins. Leave a line commented
+# out to accept the default or the value derived from your live stacks.
+# Values below are placeholders; nothing here is read by the application at
+# runtime — these are deploy-time inputs for the CDK stacks and scripts.
+
+# ---------------------------------------------------------------- required
+# Named AWS CLI profile with administrator access to the installation account.
+# The deploy scripts materialize credentials with `aws configure export-credentials`
+# (AWS CLI v2 >= 2.9); environment-variable-only credentials are not supported.
+export AWS_PROFILE="default"
+
+# Your 12-digit AWS account id. The deploy refuses to run against any other
+# account (your guard rail against deploying into the wrong one).
+export MARSHAL_AWS_ACCOUNT_ID="123456789012"
+
+# ---------------------------------------------------------------- recommended
+# E-mail subscribed to the CloudWatch alarm topic. Without it alarms fire into
+# the void (the deploy warns but continues).
+export OPS_ALERT_EMAIL="ops@example.com"
+
+# Shown as the support mailto in the product (build-time, inlined into the UI).
+export NEXT_PUBLIC_SUPPORT_EMAIL="support@example.com"
+
+# ---------------------------------------------------------------- deployment tier
+# direct = generated agents deploy into THIS account (default; one account).
+# isb    = AWS Innovation Sandbox vends an isolated account per deployment;
+#          also set ISB_API_BASE_URL and ISB_BLUEPRINT_ID in backend/.env
+#          (deploy-env.sh reads them from there) — see docs/innovation-sandbox-guide.md.
+export SANDBOX_PROVIDER="direct"
+
+# ---------------------------------------------------------------- sizing tier
+# production = today's exact sizing (default): RDS Multi-AZ, backend and
+#              frontend autoscaling floors of two tasks, Container Insights on.
+#              Idle floor ≈ $190–195/month.
+# evaluate   = single-AZ RDS, one-task floors (desiredCount 1, minCapacity 1;
+#              the ceilings stay), Container Insights off. ≈ $120–125/month.
+#              Switching an existing install changes the RDS instance (Multi-AZ
+#              conversion applied in place, no failover; measured 3 minutes)
+#              and the service floors; the one-task floor makes the API
+#              unreachable for 2–3 minutes while the backend rolls (README
+#              "What it costs to leave running").
+# export MARSHAL_TIER="production"
+
+# ---------------------------------------------------------------- codegen provider
+# internal (default) | runner — the CodeBuild workspace runner; required for
+# the cdk-app profile; `kiro` is a legacy alias. Baked into the backend task
+# env, where it is authoritative in the cloud (Admin → Model Controls cannot
+# override it); changing it takes a MarshalAppStack redeploy.
+# export CODEGEN_PROVIDER="internal"
+
+# ---------------------------------------------------------------- optional
+# Only us-east-1 is supported today (CloudFront-scope WAF, Bedrock profiles).
+# export AWS_REGION="us-east-1"
+
+# Custom domain for the app instead of the CloudFront default domain. The
+# certificate must be an ACM certificate in us-east-1 in this account.
+# export APP_DOMAIN="marshal.example.com"
+# export APP_CERT_ARN="<acm-certificate-arn-in-us-east-1>"
+
+# Cognito hosted-UI domain prefix (must be globally unique; default marshal-ai-<account-id>).
+# export COGNITO_DOMAIN_PREFIX="marshal-example"
+
+# Cognito identity and the app URL are DERIVED from MarshalAuthStack /
+# MarshalAppStack outputs on every run. Pin them only if you know why.
+# export COGNITO_USER_POOL_ID="us-east-1_XXXXXXXXX"
+# export COGNITO_CLIENT_ID="xxxxxxxxxxxxxxxxxxxxxxxxxx"
+# export COGNITO_DOMAIN="https://marshal-example.auth.us-east-1.amazoncognito.com"
+# export CLOUDFRONT_URL="https://xxxxxxxxxxxxxx.cloudfront.net"
+
+# Enclave spend surfacing via Cost Explorer (needs CE enabled on the payer
+# account and, for isb, a reader role in the management account).
+# export COST_EXPLORER_ENABLED="false"
+# export COST_READER_ROLE_ARN="arn:aws:iam::123456789012:role/MarshalCostReader"
+
+# Enterprise SSO federation into the Cognito pool (docs/sso.md). Leave unset
+# for native Cognito sign-in.
+# export ENTRA_SAML_METADATA_URL="https://login.microsoftonline.com/<tenant-id>/federationmetadata/2007-06/federationmetadata.xml?appid=<app-id>"
+# export OKTA_OIDC_ISSUER="https://<your-org>.okta.com/oauth2/default"
+# export IDP_ROLE_MAPPING='{"marshal-admins":"admin","marshal-power":"power","marshal-business":"business"}'
+
+# Optional static marketing site stack (MarshalMarketingStack). Registered only
+# when the certificate is set; serves the contents of marketing/site/ (not
+# included in the public repository — supply your own).
+# export MARKETING_CERT_ARN="<acm-certificate-arn-in-us-east-1>"
+# export MARKETING_APEX_DOMAIN="example.com"
