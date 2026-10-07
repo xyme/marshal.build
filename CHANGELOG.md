@@ -8,6 +8,10 @@ release notes. Entry identifiers such as **13.5AA** index the maintainers'
 internal delivery log and are kept as provenance notes.
 
 ## [Unreleased]
+### Security
+- 2026-10-07 — frontend lockfile: `sharp` 0.35.5 and `source-map-js` 1.2.2
+  (four high advisories published after v0.1.0 was cut; the supply-chain gate
+  refused the release deploy until they were upgraded).
 
 ## [0.1.0] — 2026-10-07 — first public source release
 
