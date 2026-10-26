@@ -20,7 +20,7 @@ dependencies = [
     "greenlet>=3.0",
     # PDF text extraction (pdf-docx-ingestion spec R2.3) — EXACT pin per the
     # supply-chain rule; pure Python, zero transitive deps on 3.12.
-    "pypdf==6.19.0",
+    "pypdf==6.21.2",
 ]
 
 [dependency-groups]

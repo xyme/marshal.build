@@ -9,6 +9,17 @@ internal delivery log and are kept as provenance notes.
 
 ## [Unreleased]
 ### Security
+- 2026-10-12 — Dependency patch wave. Frontend: Next.js 15.5.28 (GHSA-2464-fhr4-w9xw,
+  Image Optimization RCE via SVG — not reachable here, images are unoptimized;
+  GHSA-4jqv-mc3x-m676 SSG/ISR cache poisoning — no SSG/ISR pages) and DOMPurify
+  3.4.17 via a package override (GHSA-cg2g-xh64-v4q7 SAFE_FOR_TEMPLATES bypass,
+  GHSA-mrv2-3pqr-j5jr IN_PLACE hook; DOMPurify sanitises the Mermaid diagrams
+  rendered from spec documents). Backend: pypdf 6.21.2 (eleven CVE-2026-1137xx /
+  1155xx parser DoS issues reachable through PDF attachments), certifi
+  2026.10.23 (drops the compromised emSign ECC Root CA G3 chain), cryptography
+  50.0.2, boto3 1.43.118. Rebuilt images also pick up Node 22.23.4 (security
+  release) and Python 3.12.16. Audit allowlist trimmed to the remaining postcss
+  set (fix requires Next 16).
 - 2026-10-07 — frontend lockfile: `sharp` 0.35.5 and `source-map-js` 1.2.2
   (four high advisories published after v0.1.0 was cut; the supply-chain gate
   refused the release deploy until they were upgraded).

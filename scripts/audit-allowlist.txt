@@ -30,7 +30,6 @@ GHSA-fxqj-rqcc-2cmp   # postcss incomplete fix of GHSA-6g55-p6wh-862q
 # set images.unoptimized = true: the runtime never invokes sharp. It remains in
 # the dependency tree (hence the finding) but not on any request path.
 # RE-OPEN WHEN: we introduce runtime image optimization or user-supplied images.
-GHSA-f88m-g3jw-g9cj   # sharp <0.35.0 inherited libvips CVEs
 # Added 15 Sep 2026 (blocked the S14-02 MFA-fix deploy — gate working as
 # designed). Same class and same triage as the libvips entry above: inherited
 # codec CVEs (libheif) in sharp, which S14-03 removed from the serving path
@@ -39,7 +38,6 @@ GHSA-f88m-g3jw-g9cj   # sharp <0.35.0 inherited libvips CVEs
 # exposure here.
 # RE-OPEN WHEN: runtime image optimization returns, user-supplied images
 # appear, or Next ships a non-major release resolving sharp >= 0.35.0.
-GHSA-rgj7-g3m4-5g8c   # sharp inherited libheif CVEs (GHSA-g89c-p67h-r497 et al.)
 
 # --- dompurify (moderate) — vulnerable copy is not the sanitizing path ---------
 # Two copies resolve: mermaid -> dompurify 3.4.12 (PATCHED, above the <=3.4.11
@@ -50,6 +48,3 @@ GHSA-rgj7-g3m4-5g8c   # sharp inherited libheif CVEs (GHSA-g89c-p67h-r497 et al.
 # used read-only to display markdown/code text, not to sanitize untrusted HTML.
 # RE-OPEN WHEN: monaco-editor ships with dompurify >= 3.4.12, or if any code
 # starts rendering untrusted HTML through monaco.
-GHSA-c2j3-45gr-mqc4   # dompurify CUSTOM_ELEMENT_HANDLING hook bypass
-GHSA-cmwh-pvxp-8882   # dompurify ALLOWED_ATTR pollution via setConfig()
-GHSA-vxr8-fq34-vvx9   # dompurify Trusted Types policy survives clearConfig()
