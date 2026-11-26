@@ -7,9 +7,28 @@ newest first. Before v0.1.0 the project was developed privately in sprints
 release notes. Entry identifiers such as **13.5AA** index the maintainers'
 internal delivery log and are kept as provenance notes.
 
-## [Unreleased]
+## [0.1.1] — 2026-11-26 — security patch release
 ### Security
-- 2026-10-12 — Dependency patch wave. Frontend: Next.js 15.5.28 (GHSA-2464-fhr4-w9xw,
+- 2026-11-26 — Backend: pypdf 6.21.4 (seven high-severity parser advisories
+  published 30 Oct, CVE-2026-119203 to CVE-2026-119209: infinite loops and
+  unbounded memory or run time on malformed PDFs, reachable through PDF
+  attachments; the supply-chain gate failed on them, so every deploy and fresh
+  install stopped at the image build until this upgrade).
+  Frontend: Next.js 15.5.29 (GHSA-7qx7-33qx-rqx2, SVG bypass in image
+  optimization — not reachable here, images are unoptimized;
+  GHSA-f3mh-rxg3-f5g2, HttpOnly cookie exposure through the internal
+  `x-middleware-set-cookie` header on Edge routes — the header was absent from
+  a live response of the Edge middleware; GHSA-pc58-hwjq-p385, response
+  injection when forwarding fetched responses — likely not reachable, the
+  backend proxy rebuilds each response and drops framing headers).
+  postcss-selector-parser 6.1.6 via a package override
+  (GHSA-rj75-hqrm-r3gf, quadratic selector parsing; build-time only, used by
+  `@tailwindcss/typography`, whose latest release pins 6.0.10). Known and
+  deferred: KaTeX 0.16.47, loaded by Mermaid 11 (GHSA-238p-pmpm-9mq7, low: an
+  existing prototype pollution can bypass KaTeX's trust restrictions). The
+  only supported fix is Mermaid 12.2 or later (KaTeX ^0.18); whether to
+  schedule Mermaid 12 is still open.
+- 2026-10-26 — Dependency patch wave. Frontend: Next.js 15.5.28 (GHSA-2464-fhr4-w9xw,
   Image Optimization RCE via SVG — not reachable here, images are unoptimized;
   GHSA-4jqv-mc3x-m676 SSG/ISR cache poisoning — no SSG/ISR pages) and DOMPurify
   3.4.17 via a package override (GHSA-cg2g-xh64-v4q7 SAFE_FOR_TEMPLATES bypass,
@@ -264,4 +283,5 @@ internal delivery log and are kept as provenance notes.
   guardrails, the marketplace and admin user management (S3); audit logging,
   model controls, risk assessment and guided mode (S4).
 
+[0.1.1]: https://github.com/xyme/marshal.build/releases/tag/v0.1.1
 [0.1.0]: https://github.com/xyme/marshal.build/releases/tag/v0.1.0
